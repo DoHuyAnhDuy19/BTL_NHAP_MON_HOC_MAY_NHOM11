@@ -1,0 +1,14 @@
+{
+  "dataset": "Oxford Flowers 102",
+  "random_state": 42,
+  "pixel_size": [
+    32,
+    32
+  ],
+  "hog_size": [
+    64,
+    64
+  ],
+  "split": "Train 1020, Val 1020, Test 6149",
+  "timestamp": "2026-11-17 16:03:56"
+}

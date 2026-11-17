@@ -1,0 +1,62 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Bảng phân công nhiệm vụ và đóng góp cá nhân}
+\begin{table}[H]
+\centering
+\small
+\caption{Bảng phân công nhiệm vụ và tỷ lệ đóng góp của các thành viên Nhóm 11}
+\label{tab:task_assignment}
+\begin{tabular}{@{}p{3.0cm} p{5.0cm} p{4.6cm} r@{}}
+\hline
+\textbf{Thành viên} & \textbf{Nhiệm vụ chính} & \textbf{Minh chứng công việc} & \textbf{Tỷ lệ} \\ \hline
+Đỗ Tiến Sơn & - Khảo sát dữ liệu và phân tích EDA.\newline - Lập trình Luồng A (Pixel Baseline).\newline - Xây dựng mô hình K-NN và tuning.\newline - Phân tích định lượng ma trận lỗi. & - Module EDA trong \texttt{train.py}\newline - Biểu đồ validation, metrics\newline - Soạn thảo báo cáo và LaTeX & 50\% \\ \hline
+Đỗ Huy Anh Duy & - Lập trình Luồng B (Trích xuất HOG).\newline - Xây dựng mô hình Decision Tree.\newline - Thiết kế giao diện Desktop GUI Tkinter.\newline - Tích hợp từ điển song ngữ Anh-Việt. & - Hàm \texttt{compute\_hog\_single}\newline - Mã nguồn \texttt{src/gui\_app.py}\newline - 5 ảnh chụp minh chứng GUI & 50\% \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Trích đoạn mã nguồn cốt lõi}
+\subsection{Thuật toán trích xuất HOG thủ công}
+\begin{lstlisting}[language=Python, caption={Hàm trích xuất HOG thủ công không dùng thư viện đen}]
+def compute_hog_single(img_array, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2)):
+    H, W = img_array.shape
+    gx = np.zeros_like(img_array)
+    gy = np.zeros_like(img_array)
+    gx[:, 1:-1] = img_array[:, 2:] - img_array[:, :-2]
+    gy[1:-1, :] = img_array[2:, :] - img_array[:-2, :]
+    
+    mag = np.sqrt(gx**2 + gy**2)
+    ori = np.arctan2(gy, gx) * (180.0 / np.pi) % 180.0
+    
+    cx, cy = pixels_per_cell
+    n_cells_y = H // cy
+    n_cells_x = W // cx
+    
+    hist = np.zeros((n_cells_y, n_cells_x, orientations), dtype=np.float32)
+    bin_width = 180.0 / orientations
+    bin_idx = np.clip((ori / bin_width).astype(int), 0, orientations - 1)
+    
+    for b in range(orientations):
+        mask = (bin_idx == b)
+        w_mag = mag * mask
+        hist[:, :, b] = w_mag.reshape(n_cells_y, cy, n_cells_x, cx).sum(axis=(1, 3))
+                
+    bx, by = cells_per_block
+    n_blocks_y = n_cells_y - by + 1
+    n_blocks_x = n_cells_x - bx + 1
+    
+    blocks = []
+    eps = 1e-5
+    for i in range(n_blocks_y):
+        for j in range(n_blocks_x):
+            block = hist[i:i+by, j:j+bx, :].ravel()
+            norm = np.sqrt(np.sum(block**2) + eps)
+            block = block / norm
+            block = np.clip(block, 0, 0.2)
+            norm = np.sqrt(np.sum(block**2) + eps)
+            block = block / norm
+            blocks.append(block)
+            
+    return np.concatenate(blocks)
+\end{lstlisting}
+\end{document}

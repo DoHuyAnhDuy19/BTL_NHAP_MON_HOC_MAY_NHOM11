@@ -1,0 +1,57 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Tính cấp thiết của đề tài}
+Trong những năm gần đây, cùng với sự bùng nổ của Trí tuệ nhân tạo (AI) và Khoa học dữ liệu, Thị giác máy tính (Computer Vision) đã có những bước tiến vượt bậc và trở thành một trong những lĩnh vực nghiên cứu ứng dụng mũi nhọn của Công nghệ thông tin. Khả năng tự động tiếp nhận, xử lý, phân tích và trích xuất thông tin hữu ích từ hình ảnh kỹ thuật số đã mở ra tiềm năng to lớn trong nhiều ngành kinh tế và đời sống xã hội: từ hệ thống xe tự hành, nhận dạng khuôn mặt, chẩn đoán hình ảnh y tế, cho đến giám sát nông nghiệp thông minh và quản lý tài nguyên sinh vật.
+
+Trong lĩnh vực sinh thái học và thực vật học, bài toán nhận dạng và phân loại các loài hoa (Flower Classification) giữ một vai trò đặc biệt quan trọng. Nhận dạng hoa tự động không chỉ hỗ trợ đắc lực cho các nhà thực vật học trong công tác khảo sát thực địa, bảo tồn các loài thực vật quý hiếm, quản lý hệ sinh thái cảnh quan, mà còn mang lại giá trị ứng dụng cao cho cộng đồng: giúp người nông dân phát hiện nhanh giống hoa, hỗ trợ doanh nghiệp kinh doanh cây cảnh tự động hóa phân loại sản phẩm, hay phục vụ người yêu thiên nhiên tra cứu thông tin sinh học tức thì qua các ứng dụng di động.
+
+Tuy nhiên, dưới góc độ kỹ thuật học máy và thị giác máy tính, phân loại hoa tự nhiên là một bài toán cực kỳ phức tạp và đầy thách thức. Độ khó này bắt nguồn từ hai đặc trưng nội tại của dữ liệu thực vật:
+\begin{itemize}
+    \item \textbf{Sự biến thiên lớn bên trong cùng một lớp (High Intra-Class Variation):} Cùng một loài hoa nhưng hình thái bông hoa có thể biến đổi rất đa dạng qua từng giai đoạn sinh trưởng (từ nụ hoa e ấp đến khi bung nở rực rỡ và tàn úa). Hơn thế nữa, ảnh chụp ngoài tự nhiên luôn chịu tác động mạnh bởi góc chụp (chụp nghiêng, chụp thẳng, chụp cận cảnh vĩ mô), điều kiện ánh sáng thay đổi (nắng gắt, bóng râm, ngược sáng) và bối cảnh hậu cảnh phức tạp (lá cây xanh, cành khô, đất đá, rào chắn xung quanh).
+    \item \textbf{Độ tương đồng thị giác rất cao giữa các loài hoa khác nhau (High Inter-Class Similarity):} Rất nhiều loài hoa thuộc các họ sinh học khác nhau lại có cấu trúc cánh hoa xếp lớp hình tròn, số lượng cánh hoa tương đồng, hoặc màu sắc hoàn toàn giống nhau (như các loài cúc vàng dại, bồ công anh, cúc mặt trời; hay các loài hoa màu tím biếc như hoa dạ yến thảo, bìm bìm, lưu ly).
+\end{itemize}
+
+Để giải quyết bài toán trên trong khuôn khổ học phần Nhập môn Học máy (FIT4013) theo hướng dẫn của giảng viên \cite{lethithuytrang2026huongdan, lethithuytrang2026baigiang}, việc xây dựng một quy trình học máy bài bản, khoa học từ tiền xử lý dữ liệu thô, thiết kế các bộ trích xuất đặc trưng có căn cứ lý thuyết, huấn luyện và tinh chỉnh các thuật toán đã học như K-Nearest Neighbors (K-NN) và Cây quyết định (Decision Tree), kết hợp phân tích lỗi nghiêm túc là một nhiệm vụ mang tính thực tiễn và sư phạm sâu sắc.
+
+\section{Mục tiêu nghiên cứu}
+Mục tiêu cốt lõi của bài tập lớn này bao gồm các khía cạnh chính sau:
+\begin{enumerate}
+    \item \textbf{Về mặt kiến thức:} Nắm vững và vận dụng sáng tạo các nguyên lý học máy đã được giảng dạy trong học phần FIT4013; làm chủ kỹ thuật phân tích khám phá dữ liệu (EDA), kỹ thuật trích xuất đặc trưng ảnh thủ công (Handcrafted Features) thông qua phương pháp làm phẳng pixel và bộ mô tả biểu đồ hướng gradient (HOG); thấu hiểu cơ chế hoạt động, ưu nhược điểm và ranh giới toán học của thuật toán K-NN và Cây quyết định.
+    \item \textbf{Về mặt kỹ năng thực hành:} Xây dựng được một quy trình (Pipeline) học máy hoàn chỉnh, có cấu trúc module rõ ràng, độc lập và khả năng tái lập (Reproducibility) cao; thiết lập quy trình phân chia dữ liệu khoa học để triệt tiêu hoàn toàn nguy cơ rò rỉ dữ liệu (Anti-data leakage); sử dụng thành thạo các chỉ số đánh giá đa chiều (Accuracy, Macro-Precision, Macro-Recall, Macro-F1, Confusion Matrix) thay vì chỉ nhìn nhận một giá trị Accuracy bề nổi; phát triển kỹ năng phân tích lỗi (Error Analysis) dựa trên bằng chứng dữ liệu thực tế.
+    \item \textbf{Về mặt sản phẩm ứng dụng:} Xây dựng hoàn chỉnh một ứng dụng có giao diện đồ họa người dùng Desktop GUI (Graphical User Interface) bằng Python Tkinter, cho phép người dùng nạp ảnh bất kỳ, thực hiện dự đoán thời gian thực với mô hình tối ưu đã lưu trữ, hiển thị danh pháp hoa song ngữ Anh - Việt và trực quan hóa phân phối xác suất Top-5 loài hoa gần nhất.
+\end{enumerate}
+
+\section{Đối tượng và phạm vi nghiên cứu}
+\begin{itemize}
+    \item \textbf{Đối tượng nghiên cứu:} Ảnh kỹ thuật số chụp các loài hoa tự nhiên thuộc bộ dữ liệu chuẩn học thuật quốc tế Oxford 102 Category Flower Dataset do Nhóm Nghiên cứu Hình học Thị giác (Visual Geometry Group - VGG), Khoa Khoa học Kỹ thuật, Đại học Oxford phát hành.
+    \item \textbf{Phạm vi dữ liệu:} Toàn bộ 8.189 ảnh thuộc 102 loài hoa, giữ nguyên cấu trúc phân chia 3 tập chuẩn của bộ dữ liệu (Train: 1.020 ảnh, Validation: 1.020 ảnh, Test: 6.149 ảnh).
+    \item \textbf{Phạm vi kỹ thuật:} Tập trung nghiên cứu và so sánh hai thuật toán học máy có giám sát cổ điển nằm trong chương trình học: Thuật toán K láng giềng gần nhất (K-NN) và Thuật toán Cây quyết định (Decision Tree); kết hợp hai phương án biểu diễn dữ liệu là Pixel thô (Baseline) và Bộ mô tả HOG cải tiến.
+\end{itemize}
+
+\section{Phương pháp nghiên cứu}
+Đề tài áp dụng phương pháp nghiên cứu thực nghiệm có đối chứng (Empirical Benchmark), bao gồm:
+\begin{itemize}
+    \item \textbf{Nghiên cứu lý thuyết:} Phân tích cấu trúc toán học của các thuật toán phân loại và phương pháp trích xuất đặc trưng ảnh; phân tích giả định và điều kiện hội tụ của từng mô hình.
+    \item \textbf{Thực nghiệm khoa học:} Thiết kế hai luồng thực nghiệm song song (Luồng A - Pixel Baseline và Luồng B - HOG Features); thực hiện dò tìm siêu tham số trên tập kiểm thực (Validation Set) để chọn ra cấu hình tối ưu; sau đó đánh giá độc lập trên tập kiểm thử (Test Set).
+    \item \textbf{Định lượng và thống kê:} Đo đạc toàn bộ các thước đo hiệu năng (Accuracy, Precision, Recall, Macro-F1) và chi phí tài nguyên (thời gian huấn luyện, thời gian suy luận); lập bảng đối sánh và vẽ biểu đồ so sánh khách quan.
+    \item \textbf{Phân tích lỗi định tính và định lượng:} Trích xuất các mẫu bị dự đoán sai, phân tích ma trận nhầm lẫn để tìm các cặp lớp có tỷ lệ nhầm lẫn cao nhất, kiểm tra trực quan hình ảnh gốc để tìm ra nguyên nhân thị giác.
+\end{itemize}
+
+\section{Đóng góp nổi bật của đề tài}
+\begin{enumerate}
+    \item Xây dựng được mã nguồn mở độc lập, sạch sẽ, chuẩn mực khoa học dữ liệu, không sử dụng các hàm ``hộp đen'' che giấu bản chất; thuật toán trích xuất HOG được cài đặt chi tiết từng bước (tính gradient, chia ô, lượng tử hóa hướng, chuẩn hóa khối).
+    \item Đưa ra lời giải thích thuyết phục, có căn cứ thực nghiệm về hiện tượng tại sao đặc trưng Pixel thô giữ lại thông tin màu sắc lại cho độ chính xác phân loại tổng thể cao hơn đặc trưng HOG mức xám trên bộ dữ liệu Oxford 102, giúp làm sáng tỏ mối quan hệ giữa bản chất dữ liệu thị giác và phương pháp biểu diễn.
+    \item Hoàn thiện một ứng dụng Desktop GUI chuyên nghiệp, thân thiện, có từ điển song ngữ Anh - Việt cho toàn bộ 102 loài hoa, minh chứng khả năng đưa mô hình học máy vào ứng dụng thực tiễn (nhận điểm thưởng đồ án theo quy chế).
+\end{enumerate}
+
+\section{Bố cục của báo cáo}
+Báo cáo được kết cấu thành 3 chương chính và các phần phụ lục:
+\begin{itemize}
+    \item \textbf{Chương 1: Tổng quan bài toán phân loại ảnh và cơ sở lý thuyết học máy.}
+    \item \textbf{Chương 2: Thiết kế giải pháp, tiền xử lý và xây dựng pipeline học máy.}
+    \item \textbf{Chương 3: Thực nghiệm, đánh giá kết quả, phân tích lỗi và demo ứng dụng.}
+    \item \textbf{Kết luận và Hướng phát triển.}
+    \item \textbf{Tài liệu tham khảo và Các phụ lục minh chứng.}
+\end{itemize}
+\end{document}

@@ -1,0 +1,119 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\geometry{left=3cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\begin{document}
+\begin{titlepage}
+\centering
+{\large TRƯỜNG ................................................}\\[1cm]
+{\large HỌC PHẦN: NHẬP MÔN HỌC MÁY -- FIT4013}\\[2cm]
+{\Large\bfseries BÁO CÁO BÀI TẬP LỚN}\\[0.8cm]
+{\huge\bfseries PHÂN LOẠI HOA}\\[1.5cm]
+\begin{flushleft}
+\textbf{Đề tài:} 7 -- Phân loại hoa\\
+\textbf{Nhóm:} 11\\
+\textbf{Thành viên:}\\
+1. Đỗ Tiến Sơn\\
+2. Đỗ Huy Anh Duy\\[0.5cm]
+\textbf{Giảng viên hướng dẫn:} ................................
+\end{flushleft}
+\vfill
+{\large Năm học 2026--2027}
+\end{titlepage}
+
+\tableofcontents
+\chapter{Đặt vấn đề và phân tích yêu cầu}
+\section{Bối cảnh và mục tiêu}
+Phân loại ảnh hoa là bài toán phân loại nhiều lớp trong thị giác máy tính. Đầu vào là ảnh màu của một bông hoa; đầu ra là nhãn thuộc một trong 102 lớp của bộ dữ liệu Oxford Flowers 102. Mục tiêu của nhóm là xây dựng, đánh giá và so sánh các pipeline học máy cổ điển, không chỉ gọi một mô hình có sẵn.
+
+\section{Nguồn và mô tả dữ liệu}
+Nhóm sử dụng Oxford Flowers 102 theo đường dẫn được nêu trong hướng dẫn FIT4013: \url{https://www.robots.ox.ac.uk/~vgg/data/flowers/102/}. Bộ dữ liệu có 102 lớp, tổng cộng 8.189 ảnh; split chuẩn gồm train 1.020, validation 1.020 và test 6.149 ảnh. Mỗi lớp có số ảnh khác nhau và ảnh có biến thiên về góc chụp, tỷ lệ, ánh sáng và nền.
+\begin{table}[H]\centering
+\caption{Phân chia dữ liệu chuẩn}
+\begin{tabular}{lrr}\toprule
+Tập & Số ảnh & Vai trò\\\midrule
+Train & 1.020 & Huấn luyện\\
+Validation & 1.020 & Chọn tham số\\
+Test & 6.149 & Đánh giá cuối\\\bottomrule
+\end{tabular}
+\end{table}
+\textbf{Minh chứng cần chèn:} \texttt{outputs/dataset\_summary.csv}, \texttt{class\_distribution.png}, \texttt{sample\_images.png}. Các số liệu EDA thực tế cần đối chiếu với lần chạy của nhóm.
+
+\section{Phân tích dữ liệu (EDA)}
+Sau khi chạy chương trình, mô tả kích thước ảnh, số lớp thực tế, số lượng ảnh mỗi lớp, giá trị nhỏ nhất/lớn nhất, các ảnh mẫu và các vấn đề quan sát được. Không kết luận có ảnh hỏng/trùng nếu chưa kiểm tra và có minh chứng.
+
+\chapter{Thiết kế giải pháp và quy trình học máy}
+\section{Pipeline tổng quát}
+Nguồn ảnh $\rightarrow$ EDA $\rightarrow$ resize/chuyển không gian màu $\rightarrow$ biểu diễn pixel hoặc HOG $\rightarrow$ huấn luyện K-NN/Decision Tree $\rightarrow$ đánh giá $\rightarrow$ phân tích lỗi.
+
+\section{Tiền xử lý và biểu diễn đặc trưng}
+\begin{itemize}
+\item Baseline pixel: chuyển RGB, resize về $32\times32$, chia giá trị pixel cho 255 và làm phẳng thành vector.
+\item HOG: chuyển grayscale, resize về $64\times64$, trích xuất Histogram of Oriented Gradients với 9 hướng, ô $8\times8$ và block $2\times2$.
+\item StandardScaler được fit trên tập train (hoặc train+validation khi huấn luyện cuối), không fit trên test.
+\end{itemize}
+
+\section{Chia dữ liệu và chống rò rỉ}
+Nhóm giữ nguyên ba split chính thức. Validation được dùng để lựa chọn tham số. Sau khi chọn cấu hình, mô hình được fit lại trên train kết hợp validation; test chỉ được dùng cho đánh giá cuối cùng. Không dùng nhãn test để chọn mô hình.
+
+\section{Thuật toán và tham số}
+\begin{itemize}
+\item K-NN: thử $k\in\{1,3,5,7\}$, trọng số khoảng cách, khoảng cách Euclid.
+\item Decision Tree: thử \texttt{max\_depth} thuộc $\{10,20,\texttt{None}\}$, tiêu chí Gini.
+\end{itemize}
+Ba cấu hình so sánh: K-NN + pixel (baseline), K-NN + HOG và Decision Tree + HOG.
+
+\chapter{Phân tích mã nguồn và chức năng}
+Mã nguồn chính nằm tại \texttt{src/train.py}; notebook tại \texttt{notebooks/Nhom11\_PhanLoaiHoa.ipynb}.
+\begin{itemize}
+\item \texttt{load\_split}: tải ảnh và nhãn theo split.
+\item \texttt{pixel\_features}: resize và chuẩn hóa pixel.
+\item \texttt{hog\_features}: trích xuất HOG.
+\item Khối validation: thử tham số và chọn cấu hình theo Macro-F1.
+\item Khối test: fit lại mô hình đã chọn, dự đoán test, lưu metric, confusion matrix và các mẫu dự đoán sai.
+\end{itemize}
+
+\chapter{Thử nghiệm và kết quả}
+\section{Thiết lập thí nghiệm}
+Random state = 42. Kích thước pixel = $32\times32$; kích thước HOG = $64\times64$. Môi trường, phiên bản thư viện và thời gian chạy được bổ sung sau khi thực thi.
+
+\section{Kết quả định lượng}
+\textbf{BẮT BUỘC:} thay bảng dưới đây bằng số liệu thực tế trong \texttt{outputs/metrics.csv}; không tự điền hoặc ước lượng số liệu.
+\begin{table}[H]\centering
+\caption{So sánh mô hình trên tập test}
+\begin{tabular}{lrrrr}\toprule
+Mô hình & Accuracy & Precision-Macro & Recall-Macro & F1-Macro\\\midrule
+K-NN + Pixel & -- & -- & -- & --\\
+K-NN + HOG & -- & -- & -- & --\\
+Decision Tree + HOG & -- & -- & -- & --\\\bottomrule
+\end{tabular}
+\end{table}
+Chèn biểu đồ \texttt{outputs/model\_comparison.png} và các confusion matrix được sinh sau khi chạy.
+
+\chapter{Thảo luận, so sánh và phân tích lỗi}
+So sánh các cấu hình dựa trên Macro-F1 và các metric khác. Phân tích ảnh hưởng của biểu diễn pixel/HOG, số chiều đặc trưng, lựa chọn $k$ và độ sâu cây. Sử dụng \texttt{outputs/errors\_*.csv} và \texttt{outputs/top\_confusions\_*.csv} để chỉ ra cặp lớp dễ nhầm. Mở các ảnh tương ứng để đưa ra giả thuyết có căn cứ (màu sắc gần nhau, hình dạng cánh hoa tương tự, nền phức tạp, góc chụp/ánh sáng khác biệt).
+
+\section{Hạn chế}
+Oxford Flowers 102 có 102 lớp và số ảnh mỗi lớp không đồng đều; một số lớp có ít ảnh train. Pixel thô nhạy với vị trí, nền và ánh sáng; HOG nhấn mạnh biên/cấu trúc nhưng có thể bỏ qua thông tin màu. K-NN tốn chi phí lưu và so sánh với nhiều mẫu; cây quyết định có thể overfit nếu không giới hạn độ sâu.
+
+\chapter{Tổng kết và hướng phát triển}
+Tóm tắt kết quả tốt nhất dựa trên số liệu test thực tế. Hướng phát triển có thể gồm tăng cường dữ liệu, thử PCA, SVM hoặc transfer learning như phần mở rộng; các phương án mở rộng không thay thế yêu cầu so sánh thuật toán cổ điển của học phần.
+
+\appendix
+\chapter{Khai báo sử dụng AI}
+Nhóm sử dụng AI để hỗ trợ đọc yêu cầu, gợi ý cấu trúc và rà soát mã nguồn. Nhóm tự chịu trách nhiệm chạy thực nghiệm, kiểm chứng kết quả, chỉnh sửa báo cáo và giải thích sản phẩm khi bảo vệ. Chi tiết ghi trong tệp \texttt{AI\_USAGE.md}.
+
+\begin{thebibliography}{9}
+\bibitem{nilsback2008} M.-E. Nilsback and A. Zisserman, ``Automated flower classification over a large number of classes,'' Indian Conference on Computer Vision, Graphics and Image Processing, 2008.
+\bibitem{oxford} Visual Geometry Group, University of Oxford, ``102 Category Flower Dataset,'' \url{https://www.robots.ox.ac.uk/~vgg/data/flowers/102/}.
+\bibitem{fit4013} L. T. T. Trang, ``Hướng dẫn thực hiện bài tập lớn học phần Nhập môn học máy FIT4013,'' năm học 2026--2027.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,4 @@
+experiment,feature,selected_parameter,validation_macro_f1,accuracy,precision_macro,recall_macro,f1_macro,fit_seconds,predict_seconds
+KNN_Pixel,pixel,1,0.0998,0.1299,0.1594,0.1376,0.1059,0.0,0.59
+KNN_HOG,hog,3,0.0706,0.0642,0.2002,0.084,0.0737,0.0,0.45
+DecisionTree_HOG,hog,10,0.0158,0.0207,0.0263,0.0247,0.0183,5.17,0.02

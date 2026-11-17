@@ -1,0 +1,26 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+\begin{center}
+    \Large{\textbf{ABSTRACT}}
+\end{center}
+\vspace{0.8cm}
+
+\sloppy
+\emergencystretch 3em
+
+This report comprehensively presents the research, methodology, empirical benchmarking, error analysis, and software deployment for fine-grained multi-class flower classification under Topic 7 of the Introduction to Machine Learning course (FIT4013), Dai Nam University.
+
+The project investigates the benchmark \textbf{Oxford 102 Category Flower Dataset}, comprising 8,189 natural color images across 102 distinct flower species. The official three-way split is strictly respected: Training set (1,020 images, 10 images/class), Validation set (1,020 images, 10 images/class), and Testing set (6,149 images, highly imbalanced ranging from 20 to 238 images/class).
+
+Key technical contributions include:
+\begin{itemize}
+    \item \textbf{Exploratory Data Analysis (EDA):} Statistical examination of image integrity, channel formats, class imbalance, and visual inspection of outdoor challenges (cluttered foliage backgrounds, lighting fluctuations, perspective variations).
+    \item \textbf{Feature Engineering:} Implementation and comparative analysis of two representation pipelines: Pipeline A (Baseline) employing flattened RGB pixel vectors resized to $32\times32$ ($3,072$ dimensions); Pipeline B extracting Histogram of Oriented Gradients (HOG) from $64\times64$ grayscale images using 9 orientation bins, $8\times8$ pixel cells, and $2\times2$ block normalization ($1,764$ dimensions), followed by Z-score standardization.
+    \item \textbf{Anti-Data Leakage Protocol:} Data transformations and scalers are fitted strictly on training data; hyperparameter selection is performed entirely on validation data; the test set is touched only once for the final unbiased evaluation.
+    \item \textbf{Quantitative Results:} On the official 6,149 test images, K-NN with Pixel features ($k=1$) achieved 12.99\% Accuracy and 10.59\% Macro-F1; K-NN with HOG features ($k=3$) achieved 6.42\% Accuracy and 7.37\% Macro-F1 with a superior Precision-Macro of 20.02\%; Decision Tree on HOG ($\text{max\_depth}=10$) reached 2.07\% Accuracy and 1.83\% Macro-F1.
+    \item \textbf{In-depth Discussion \& Error Analysis:} Detailed justification regarding the indispensable role of color spectrum information in botanical classification, the mathematical vulnerability of single decision trees in high-dimensional feature spaces, and structural geometric confusions identified via the confusion matrix.
+    \item \textbf{Desktop GUI Application:} A functional Python Tkinter desktop interface featuring real-time inference ($<30\text{ms}$), bilingual taxonomy (English \& Vietnamese) for all 102 categories, and horizontal probability bar charts for Top-5 nearest predictions.
+\end{itemize}
+
+\textbf{Keywords:} Machine Learning, Flower Classification, Oxford Flowers 102, K-Nearest Neighbors, Decision Tree, HOG, Anti-data leakage, Macro-F1, Tkinter GUI.
+\end{document}

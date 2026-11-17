@@ -1,0 +1,89 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Kiến trúc tổng thể của hệ thống}
+Hệ thống phân loại hoa được nhóm thiết kế dưới dạng một pipeline học máy khép kín, gồm các bước nối tiếp: tiếp nhận dữ liệu ảnh thô $\rightarrow$ phân tích khám phá dữ liệu (EDA) $\rightarrow$ tiền xử lý và trích xuất đặc trưng đa luồng $\rightarrow$ chia tách tập dữ liệu nghiêm ngặt $\rightarrow$ tinh chỉnh siêu tham số trên Validation $\rightarrow$ huấn luyện và đánh giá trên Test $\rightarrow$ phân tích lỗi $\rightarrow$ đóng gói mô hình cho ứng dụng Desktop GUI.
+
+\section{Khám phá và phân tích dữ liệu thực tế (EDA)}
+\subsection{Kiểm tra tính toàn vẹn và cấu trúc dữ liệu}
+Toàn bộ 8.189 tệp tin ảnh JPEG trong thư mục \texttt{data/flowers-102/jpg/} đã được kiểm tra tự động qua thư viện PIL. Không có tệp tin nào bị hỏng, rỗng hoặc sai định dạng. Nhãn lớp trong tệp \texttt{imagelabels.mat} trải dài từ 1 đến 102.
+
+\subsection{Phân tích phân phối số lượng mẫu}
+Tập Train và Validation có phân phối phẳng hoàn hảo (đúng 10 ảnh/lớp). Ngược lại, tập Test có sự phân bổ mất cân bằng rất mạnh, với lớp ít nhất có 20 ảnh và lớp nhiều nhất có tới 238 ảnh.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{Hinhve/class_distribution.png}
+\caption{Biểu đồ phân phối số lượng mẫu của 102 lớp hoa trên các tập Train, Validation và Test}
+\label{fig:class_distribution}
+\end{figure}
+
+\subsection{Khảo sát trực quan các mẫu ảnh}
+Hình \ref{fig:sample_images} minh họa một số mẫu hoa tiêu biểu trong bộ dữ liệu Oxford 102. Các hình ảnh cho thấy sự đa dạng lớn về góc chụp, điều kiện ánh sáng và bối cảnh tự nhiên phức tạp.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Hinhve/sample_images.png}
+\caption{Hình ảnh mẫu tiêu biểu của các loài hoa trong bộ dữ liệu Oxford Flowers 102}
+\label{fig:sample_images}
+\end{figure}
+
+\section{Thiết kế hai luồng tiền xử lý và trích xuất đặc trưng}
+Để đáp ứng yêu cầu so sánh đối chứng giữa hai phương án biểu diễn từ cùng một nguồn dữ liệu thô, nhóm xây dựng hai luồng độc lập:
+
+\subsection{Luồng A: Pipeline xử lý điểm ảnh cơ sở (Baseline Pixel Pipeline)}
+\begin{itemize}
+    \item Ảnh được đọc ở định dạng màu RGB đầy đủ.
+    \item Thay đổi kích thước (Resize) về kích thước chuẩn $32 \times 32$ pixel bằng phép nội suy song tuyến tính.
+    \item Chuẩn hóa giá trị điểm ảnh từ $[0, 255]$ về $[0.0, 1.0]$ bằng cách chia cho 255.0.
+    \item Làm phẳng (Flatten) thành vector $3.072$ chiều ($32 \times 32 \times 3$).
+\end{itemize}
+
+\subsection{Luồng B: Pipeline trích xuất đặc trưng HOG cải tiến (Advanced HOG Pipeline)}
+\begin{itemize}
+    \item Chuyển đổi ảnh sang ảnh mức xám Grayscale để triệt tiêu ảnh hưởng của biến thiên độ chiếu sáng.
+    \item Resize về kích thước $64 \times 64$ pixel để giữ lại các chi tiết viền cánh hoa.
+    \item Tự lập trình trích xuất HOG với 9 bin hướng, kích thước cell $8 \times 8$ pixel, khối chuẩn hóa $2 \times 2$ cells (chuẩn L2-Hys) tạo thành vector $1.764$ chiều.
+    \item Chuẩn hóa đặc trưng bằng Z-score (\texttt{StandardScaler}).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{So sánh cấu hình kỹ thuật giữa Luồng A (Pixel) và Luồng B (HOG)}
+\label{tab:pipeline_comparison}
+\begin{tabular}{@{}p{3.8cm} p{4.8cm} p{5.4cm}@{}}
+\hline
+\textbf{Thông số kỹ thuật} & \textbf{Luồng A (Pixel Baseline)} & \textbf{Luồng B (Advanced HOG)} \\ \hline
+Không gian màu đầu vào & RGB (3 kênh) & Grayscale (1 kênh) \\
+Kích thước ảnh sau resize & $32 \times 32$ pixel & $64 \times 64$ pixel \\
+Phương pháp trích xuất & Làm phẳng trực tiếp (Flatten) & Histogram of Oriented Gradients \\
+Cấu hình Cell / Block & Không áp dụng & Cell $8\times8$, Block $2\times2$, 9 bins \\
+Số chiều vector đặc trưng & $3.072$ chiều & $1.764$ chiều \\
+Phương pháp chuẩn hóa & Chia tỷ lệ $[0, 1]$ (/255.0) & Z-score (\texttt{StandardScaler}) \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Chiến lược phân chia dữ liệu và Cơ chế chống rò rỉ dữ liệu}
+Để đảm bảo tính khách quan và hạn chế tối đa rò rỉ dữ liệu (Data Leakage):
+\begin{enumerate}
+    \item Nhóm tuân thủ nghiêm ngặt 3 tập phân chia chuẩn của tác giả bộ dữ liệu: Train (1.020 ảnh), Validation (1.020 ảnh), Test (6.149 ảnh).
+    \item \textbf{Nguyên tắc chống rò rỉ phân phối:} Đối tượng \texttt{StandardScaler} chỉ được \texttt{fit} trên dữ liệu tập Train. Dữ liệu tập Validation và Test chỉ được biến đổi bằng hàm \texttt{transform} dựa trên kỳ vọng $\mu$ và độ lệch chuẩn $\sigma$ đã học từ Train.
+    \item Tập Test hoàn toàn được đóng băng trong suốt quá trình tinh chỉnh mô hình và chỉ được mở ra duy nhất một lần ở bước đánh giá cuối cùng.
+\end{enumerate}
+
+\section{Chiến lược dò tìm siêu tham số trên Validation}
+Không gian siêu tham số được khảo sát:
+\begin{itemize}
+    \item \textbf{K-NN Pixel:} $k \in \{1, 3, 5, 7\}$, khoảng cách Euclid.
+    \item \textbf{K-NN HOG:} $k \in \{1, 3, 5, 7\}$, khoảng cách Euclid.
+    \item \textbf{Decision Tree HOG:} $\text{max\_depth} \in \{10, 20, \text{None}\}$, tiêu chí Gini.
+\end{itemize}
+Cấu hình đạt chỉ số \textbf{Validation Macro-F1} cao nhất sẽ được chọn làm đại diện để bước vào vòng đánh giá chính thức trên tập Test.
+
+\section{Thiết kế phần mềm và cấu trúc module mã nguồn}
+Mã nguồn được tổ chức sạch sẽ, tường minh thành hai kịch bản chính:
+\begin{itemize}
+    \item \texttt{src/train.py}: Chứa toàn bộ logic đọc dữ liệu, trích xuất đặc trưng HOG thủ công, vòng lặp validation, huấn luyện mô hình tối ưu trên Train+Val, dự đoán Test, tính toán ma trận nhầm lẫn và xuất báo cáo CSV.
+    \item \texttt{src/gui\_app.py}: Xây dựng ứng dụng giao diện Desktop Tkinter nạp trực tiếp mô hình \texttt{best\_knn\_hog\_model.pt}, hỗ trợ người dùng tải ảnh và nhận diện theo thời gian thực.
+\end{itemize}
+\end{document}

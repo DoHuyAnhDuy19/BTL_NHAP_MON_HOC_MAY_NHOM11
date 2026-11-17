@@ -1,0 +1,47 @@
+\documentclass[DoAn.tex]{subfiles}
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+
+%--- Khung viền đôi chuẩn đồ án ---
+\begin{tikzpicture}[remember picture, overlay]
+  \draw [line width=0.8pt] 
+    ($(current page.north west) + (2.0cm, -1.5cm)$)
+    rectangle 
+    ($(current page.south east) + (-1.5cm, 1.5cm)$);
+
+  \draw [line width=2pt] 
+    ($(current page.north west) + (2.0cm + 2mm, -1.5cm - 2mm)$) 
+    rectangle 
+    ($(current page.south east) + (-1.5cm - 2mm, 1.5cm + 2mm)$);
+\end{tikzpicture}
+
+%--- Nội dung trang bìa ---
+\begin{center}
+  \vspace*{0.2cm}
+  {\Large\textbf{TRƯỜNG ĐẠI HỌC ĐẠI NAM}}\\
+  {\large\textbf{KHOA CÔNG NGHỆ THÔNG TIN}}\\[1.0cm]
+
+  \includegraphics[width=4.5cm]{Hinhve/Logo_DAI_NAM.png}\\[1.0cm]
+
+  {\Huge\textbf{BÁO CÁO BÀI TẬP LỚN}}\\[0.4cm]
+  {\Large\textbf{HỌC PHẦN: NHẬP MÔN HỌC MÁY (FIT4013)}}\\[0.3cm]
+  {\large\textbf{NĂM HỌC 2026 -- 2027}}\\[1.0cm]
+
+  {\Large\bfseries ĐỀ TÀI 7:}\\[0.3cm]
+  {\huge\bfseries PHÂN LOẠI HOA}\\[0.4cm]
+  {\large\textbf{NGHIÊN CỨU VÀ ĐÁNH GIÁ MÔ HÌNH HỌC MÁY TRÊN BỘ DỮ LIỆU OXFORD FLOWERS 102}}\\[1.6cm]
+
+  \begin{tabular}{ll}
+    \textbf{Nhóm sinh viên thực hiện:} & \textbf{Nhóm 11} \\
+    \textbf{Sinh viên 1:} & Đỗ Tiến Sơn \\
+    \textbf{Sinh viên 2:} & Đỗ Huy Anh Duy \\
+    \textbf{Ngành:} & Công nghệ Thông tin \\
+    \textbf{Khoa:} & Công nghệ Thông tin \\[0.5cm]
+    \textbf{Giảng viên hướng dẫn:} & \textbf{ThS. Lê Thị Thùy Trang} \\
+  \end{tabular}\\[1.8cm]
+
+  {\large\textbf{HÀ NỘI, 11/2026}}
+\end{center}
+\end{titlepage}
+\end{document}

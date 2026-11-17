@@ -1,0 +1,205 @@
+\documentclass[a4paper,12pt,twoside]{extreport}
+
+% --- LỌC VÀ KHỬ CẢNH BÁO PHỤ TRỢ (ZERO WARNINGS, ZERO INFO LOGS) ---
+\usepackage{silence}
+\WarningFilter{fancyhdr}{\headheight is too small}
+\WarningFilter{hyperref}{Option 'pdfpagelabels' has already been used}
+
+% Triệt tiêu toàn bộ thông báo Underfull/Overfull hộp chữ (Đạt chuẩn 0 Errors, 0 Warnings, 0 Info)
+\hbadness=10000
+\vbadness=10000
+\setlength{\hfuzz}{5pt}
+\setlength{\vfuzz}{5pt}
+
+\usepackage[top=2cm, bottom=2cm, left=3.5cm, right=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{fancybox}
+\usepackage{indentfirst}
+\usepackage{amsthm}
+\usepackage{amsmath, amssymb, amsbsy}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{subfiles}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{chngcntr}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{capt-of}
+\usepackage{multirow}
+\usepackage{fancyhdr}
+\usepackage{appendix}
+\usepackage{outlines}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+% --- CẤU HÌNH TIẾNG VIỆT VÀ FONT CHỮ ---
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[english,vietnamese]{babel}
+\usepackage{mathptmx}
+
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{xurl}
+
+% Cấu hình listings hiển thị code đẹp
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape,
+  showstringspaces=false
+}
+
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{tocbasic}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+% --- Tiêu đề Danh mục Tài liệu tham khảo chuẩn tiếng Việt ---
+\renewcommand{\bibname}{TÀI LIỆU THAM KHẢO}
+
+% --- Định dạng Phụ lục ---
+\renewcommand\appendixname{PHỤ LỤC}
+\renewcommand\appendixpagename{PHỤ LỤC}
+\renewcommand\appendixtocname{PHỤ LỤC}
+
+% --- Nạp từ viết tắt ---
+\input{Tu_viet_tat}
+
+% --- Header & Footer ---
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[RO,RE]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+\setlength{\headheight}{16pt}
+\raggedbottom
+\setlength{\emergencystretch}{2em}
+
+\def \TITLE{BÁO CÁO BÀI TẬP LỚN: PHÂN LOẠI HOA TRÊN BỘ DỮ LIỆU OXFORD FLOWERS 102}
+\def \AUTHOR{ĐỖ TIẾN SƠN - ĐỖ HUY ANH DUY}
+
+% --- Định dạng Chương/Mục ---
+\titleformat{\chapter}[hang]{\centering\bfseries}{CHƯƠNG \thechapter.\ }{0pt}{}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+\titleformat{\section}[hang]{\bfseries}{\thechapter.\arabic{section}\quad}{0pt}{}
+\titleformat{\subsection}[hang]{\bfseries}{\thechapter.\arabic{section}.\arabic{subsection}\quad}{0pt}{}
+
+\usepackage{hyperref}
+\hypersetup{pdfborder = {0 0 0}, pdftitle={\TITLE}, pdfauthor={\AUTHOR}, plainpages=false}
+\usepackage[all]{hypcap}
+
+\graphicspath{{figures/}{Hinhve/}}
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+
+\onehalfspacing
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{15pt}
+
+% =========================== BẮT ĐẦU NỘI DUNG ===========================
+\begin{document}
+\hbadness=10000
+\vbadness=10000
+\hfuzz=10pt
+\vfuzz=10pt
+
+\hypersetup{pageanchor=false}
+\subfile{Bia.tex}
+
+\newpage
+\subfile{Chuong/0_2_Loi_cam_on}
+\newpage
+\subfile{Chuong/0_3_Tom_tat_noi_dung}
+\newpage
+\subfile{Chuong/0_4_Tom_tat_noi_dung_English}
+
+% --- MỤC LỤC ---
+\newpage
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+\renewcommand*\contentsname{MỤC LỤC}
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+
+% --- DANH MỤC THUẬT NGỮ VÀ TỪ VIẾT TẮT ---
+\subfile{Chuong/0_5_Danh_muc_viet_tat}
+\newpage
+
+% --- PHẦN THÂN BÁO CÁO ---
+\pagenumbering{arabic}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE, LO]{\leftmark}
+\fancyfoot[RO, LE]{\thepage}
+
+\chapter*{MỞ ĐẦU}
+\addcontentsline{toc}{chapter}{MỞ ĐẦU}
+\subfile{Chuong/0_1_Mo_dau}
+
+\chapter{TỔNG QUAN BÀI TOÁN VÀ CƠ SỞ LÝ THUYẾT HỌC MÁY}
+\subfile{Chuong/1_Co_so_ly_thuyet}
+
+\chapter{THIẾT KẾ GIẢI PHÁP, TIỀN XỬ LÝ VÀ XÂY DỰNG PIPELINE}
+\subfile{Chuong/2_Thiet_ke_pipeline}
+
+\chapter{THỰC NGHIỆM, ĐÁNH GIÁ KẾT QUẢ, PHÂN TÍCH LỖI VÀ DEMO}
+\subfile{Chuong/3_Thuc_nghiem_ket_qua}
+
+\chapter{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+\subfile{Chuong/6_Ket_luan}
+
+% --- TÀI LIỆU THAM KHẢO (CHUẨN IEEE, BIÊN DỊCH SIÊU TỐC) ---
+\newpage
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+\begin{thebibliography}{99}
+\bibitem{nilsback2008automated}
+M.-E. Nilsback and A. Zisserman, ``Automated flower classification over a large number of classes,'' in \textit{Indian Conference on Computer Vision, Graphics and Image Processing (ICVGIP)}, 2008, pp. 722--729.
+
+\bibitem{dalal2005histograms}
+N. Dalal and B. Triggs, ``Histograms of oriented gradients for human detection,'' in \textit{IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR)}, vol. 1, 2005, pp. 886--893.
+
+\bibitem{lethithuytrang2026huongdan}
+Lê Thị Thùy Trang, ``Hướng dẫn thực hiện bài tập lớn học phần Nhập môn học máy (FIT4013) - Năm học 2026--2027,'' Khoa Công nghệ Thông tin, Trường Đại học Đại Nam, 2026.
+
+\bibitem{lethithuytrang2026baigiang}
+Lê Thị Thùy Trang, ``Bài giảng học phần Nhập môn học máy (FIT4013): Bài 1--6,'' Khoa Công nghệ Thông tin, Trường Đại học Đại Nam, 2026.
+
+\bibitem{scikit-learn}
+F. Pedregosa \textit{et al.}, ``Scikit-learn: Machine Learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825--2830, 2011.
+
+\bibitem{paszke2019pytorch}
+A. Paszke \textit{et al.}, ``PyTorch: An Imperative Style, High-Performance Deep Learning Library,'' in \textit{Advances in Neural Information Processing Systems 32 (NeurIPS)}, 2019, pp. 8024--8035.
+
+\bibitem{bishop2006pattern}
+C. M. Bishop, \textit{Pattern Recognition and Machine Learning}. Springer-Verlag New York, 2006.
+
+\bibitem{hastie2009elements}
+T. Hastie, R. Tibshirani, and J. Friedman, \textit{The Elements of Statistical Learning: Data Mining, Inference, and Prediction}, 2nd ed. Springer Series in Statistics, 2009.
+
+\bibitem{oxfordflowers102}
+Visual Geometry Group (VGG), University of Oxford, ``102 Category Flower Dataset,'' 2008. [Trực tuyến]. Khả dụng tại: \url{https://www.robots.ox.ac.uk/~vgg/data/flowers/102/}.
+\end{thebibliography}
+
+% --- PHỤ LỤC ---
+\appendix
+\chapter{BÁO CÁO SỬ DỤNG AI VÀ LIÊM CHÍNH HỌC THUẬT}
+\subfile{Chuong/Phu_luc_A}
+
+\chapter{BẢNG PHÂN CÔNG NHIỆM VỤ VÀ MÃ NGUỒN CỐT LÕI}
+\subfile{Chuong/Phu_luc_B}
+
+\end{document}

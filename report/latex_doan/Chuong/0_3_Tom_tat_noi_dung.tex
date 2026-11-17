@@ -1,0 +1,23 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+\begin{center}
+    \Large{\textbf{TÓM TẮT NỘI DUNG BÁO CÁO}}
+\end{center}
+\vspace{0.8cm}
+
+Báo cáo này trình bày toàn diện quá trình nghiên cứu, thiết kế giải pháp, triển khai thực nghiệm có đối chứng, đánh giá định lượng và xây dựng ứng dụng demo hoàn chỉnh cho bài toán nhận dạng và phân loại ảnh hoa nhiều lớp (Multi-class Flower Classification), cụ thể là Đề tài 7 trong học phần Nhập môn Học máy (FIT4013), Trường Đại học Đại Nam.
+
+Bộ dữ liệu được sử dụng là \textbf{Oxford 102 Category Flower Dataset} chuẩn quốc tế gồm 8.189 bức ảnh phân bố trên 102 loài hoa. Nhóm tuân thủ nghiêm ngặt cấu trúc phân chia 3 tập chuẩn của tác giả: tập Huấn luyện (Train: 1.020 ảnh, 10 ảnh/lớp), tập Kiểm thực (Validation: 1.020 ảnh, 10 ảnh/lớp) và tập Kiểm thử (Test: 6.149 ảnh, mất cân bằng từ 20 đến 238 ảnh/lớp).
+
+Quy trình kỹ thuật được thiết kế khép kín với các nội dung trọng tâm:
+\begin{itemize}
+    \item \textbf{Khám phá dữ liệu (EDA):} Phân tích định dạng ảnh, tính toàn vẹn tệp, phân phối số lượng mẫu và khảo sát trực quan các yếu tố gây nhiễu môi trường tự nhiên (ánh sáng gắt, hậu cảnh cỏ cây, góc chụp).
+    \item \textbf{Tiền xử lý và trích xuất đặc trưng:} Xây dựng hai luồng biểu diễn song song để đối sánh: Luồng A (Baseline) sử dụng vector điểm ảnh màu RGB kích thước $32\times32$ ($3.072$ chiều); Luồng B sử dụng bộ mô tả biểu đồ hướng gradient (HOG) trên ảnh mức xám $64\times64$ với 9 bin hướng, cell $8\times8$, block $2\times2$ ($1.764$ chiều) kết hợp chuẩn hóa Z-score.
+    \item \textbf{Chống rò rỉ dữ liệu (Anti-data leakage):} Tuyệt đối chỉ fit các tham số chuẩn hóa trên tập Train; sử dụng tập Validation để tìm siêu tham số tối ưu và chỉ dùng tập Test cho đánh giá cuối cùng.
+    \item \textbf{Kết quả thực nghiệm:} Trên tập Test 6.149 ảnh, K-NN Pixel Baseline ($k=1$) đạt Accuracy 12.99\%, Macro-F1 10.59\%; K-NN HOG ($k=3$) đạt Accuracy 6.42\%, Macro-F1 7.37\% nhưng đạt Precision-Macro vượt trội lên tới 20.02\%; Cây quyết định HOG ($\text{max\_depth}=10$) đạt Accuracy 2.07\%, Macro-F1 1.83\%.
+    \item \textbf{Thảo luận chuyên sâu và Phân tích lỗi:} Báo cáo lý giải cặn kẽ vai trò sống còn của thông tin màu sắc đối với việc phân biệt hoa, phân tích nguyên nhân Cây quyết định thất bại trước không gian nhiều chiều, đồng thời mổ xẻ các cặp lớp nhầm lẫn nhiều nhất dựa trên cấu trúc hình học cánh hoa.
+    \item \textbf{Ứng dụng Desktop GUI Demo:} Triển khai hoàn chỉnh giao diện Python Tkinter hỗ trợ nạp ảnh bất kỳ, nhận dạng thời gian thực ($<30\text{ms}$), tra cứu từ điển song ngữ Anh - Việt cho 102 loài hoa và vẽ biểu đồ cột Top-5 xác suất tương đồng nhất.
+\end{itemize}
+
+\textbf{Từ khóa:} Nhập môn học máy, Phân loại hoa, Oxford Flowers 102, K-Nearest Neighbors, Cây quyết định, HOG, Anti-data leakage, Macro-F1, Tkinter GUI.
+\end{document}

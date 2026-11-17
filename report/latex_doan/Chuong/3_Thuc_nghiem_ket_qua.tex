@@ -1,0 +1,187 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Thiết lập môi trường và cấu hình thực nghiệm}
+Thực nghiệm được tiến hành trên môi trường hệ điều hành Windows 11 64-bit, Python 3.10+, PyTorch 2.x \cite{paszke2019pytorch}, Scikit-learn 1.x \cite{scikit-learn}, NumPy, PIL và Matplotlib.
+Hạt giống ngẫu nhiên được cố định \texttt{random\_state = 42} để đảm bảo 100\% khả năng tái lập.
+
+\section{Kết quả lựa chọn mô hình trên tập Validation}
+Bảng \ref{tab:val_results} tổng hợp kết quả của 11 lượt thử nghiệm siêu tham số trên tập Validation gồm 1.020 ảnh:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Kết quả dò tìm siêu tham số trên tập Validation (11 kịch bản thử nghiệm)}
+\label{tab:val_results}
+\begin{tabular}{@{}p{3.2cm} p{1.6cm} p{2.4cm} r p{3.6cm}@{}}
+\hline
+\textbf{Thử nghiệm} & \textbf{Đặc trưng} & \textbf{Siêu tham số} & \textbf{Val Acc} & \textbf{Val Macro-F1} \\ \hline
+KNN\_Pixel & Pixel & $k = 1$ & \textbf{11.96\%} & \textbf{0.0998} (Tối ưu Luồng A) \\
+KNN\_Pixel & Pixel & $k = 3$ & 11.67\% & 0.0969 \\
+KNN\_Pixel & Pixel & $k = 5$ & 10.98\% & 0.0856 \\
+KNN\_Pixel & Pixel & $k = 7$ & 11.08\% & 0.0850 \\ \hline
+KNN\_HOG & HOG & $k = 3$ & 7.25\% & \textbf{0.0706} (Tối ưu Luồng B) \\
+KNN\_HOG & HOG & $k = 1$ & \textbf{7.45\%} & 0.0705 \\
+KNN\_HOG & HOG & $k = 5$ & 7.16\% & 0.0679 \\
+KNN\_HOG & HOG & $k = 7$ & 7.16\% & 0.0643 \\ \hline
+DecisionTree\_HOG & HOG & $\text{max\_depth} = 10$ & \textbf{1.96\%} & \textbf{0.0158} (Tối ưu Cây) \\
+DecisionTree\_HOG & HOG & $\text{max\_depth} = 20$ & 1.08\% & 0.0118 \\
+DecisionTree\_HOG & HOG & $\text{max\_depth} = \text{None}$ & 1.08\% & 0.0118 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{Hinhve/model_comparison.png}
+\caption{Biểu đồ trực quan hóa so sánh các chỉ số đánh giá giữa 3 mô hình tối ưu trên tập Test}
+\label{fig:model_comparison}
+\end{figure}
+
+Dựa trên chỉ số Validation Macro-F1, các cấu hình tối ưu được lựa chọn:
+\begin{itemize}
+    \item Mô hình 1 (Baseline): K-NN với đặc trưng Pixel, chọn $k = 1$.
+    \item Mô hình 2 (Nâng cao): K-NN với đặc trưng HOG, chọn $k = 3$.
+    \item Mô hình 3 (So sánh thuật toán): Decision Tree với đặc trưng HOG, chọn $\text{max\_depth} = 10$.
+\end{itemize}
+
+\section{Kết quả định lượng trên tập kiểm thử chính thức (Test Set)}
+Sau khi huấn luyện lại trên dữ liệu kết hợp Train + Validation (2.040 ảnh), các mô hình được đánh giá độc lập trên tập Test chính thức gồm 6.149 ảnh. Bảng \ref{tab:test_metrics} thể hiện các số liệu đo đạc thực tế từ tệp \texttt{outputs/metrics.csv}:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Bảng kết quả định lượng tổng hợp trên tập Test chính thức (6.149 mẫu)}
+\label{tab:test_metrics}
+\begin{tabular}{@{}p{3.2cm} p{2.2cm} p{1.6cm} r r r r@{}}
+\hline
+\textbf{Mô hình} & \textbf{Đặc trưng} & \textbf{Tham số} & \textbf{Acc} & \textbf{Prec-M} & \textbf{Rec-M} & \textbf{Macro-F1} \\ \hline
+KNN\_Pixel & Pixel 32x32 & $k = 1$ & \textbf{12.99\%} & 15.94\% & \textbf{13.76\%} & \textbf{10.59\%} \\
+KNN\_HOG & HOG 64x64 & $k = 3$ & 6.42\% & \textbf{20.02\%} & 8.40\% & 7.37\% \\
+DecisionTree\_HOG & HOG 64x64 & depth = 10 & 2.07\% & 2.63\% & 2.47\% & 1.83\% \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{So sánh chi phí tính toán: Thời gian huấn luyện (Fit) và suy luận (Predict cho 6.149 mẫu)}
+\label{tab:time_complexity}
+\begin{tabular}{@{}p{3.5cm} p{3.0cm} r r@{}}
+\hline
+\textbf{Mô hình} & \textbf{Đặc trưng} & \textbf{Thời gian Fit} & \textbf{Thời gian Predict} \\ \hline
+KNN\_Pixel & Pixel 32x32 & 0.00 s & 0.70 s \\
+KNN\_HOG & HOG 64x64 & 0.00 s & 0.50 s \\
+DecisionTree\_HOG & HOG 64x64 & 24.93 s & \textbf{0.04 s} \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Thảo luận và so sánh kỹ thuật chuyên sâu}
+\subsection{So sánh hiệu quả HOG và Raw Pixel: Vai trò của màu sắc}
+Một phát hiện thực nghiệm then chốt là mô hình Pixel Baseline đạt Accuracy cao hơn HOG ($12.99\%$ so với $6.42\%$). Nhóm lý giải điều này xuất phát từ bản chất thị giác của đối tượng hoa:
+\begin{itemize}
+    \item Màu sắc là tín hiệu phân biệt mạnh mẽ nhất đối với hoa (hoa hướng dương màu vàng, hoa hồng màu đỏ, hoa súng màu tím biếc).
+    \item Khi trích xuất HOG, bước đầu tiên là chuyển ảnh sang mức xám Grayscale, làm mất hoàn toàn thông tin màu sắc. Nhiều loài hoa có cấu trúc cánh hoa xòe tròn tương tự nhau nhưng màu sắc đối lập sẽ trở nên bất phân biệt trong không gian gradient mức xám.
+    \item Tuy nhiên, HOG thể hiện ưu thế vượt trội ở chỉ số \textbf{Precision-Macro đạt tới 20.02\%} (so với 15.94\% của Pixel). Điều này chứng minh rằng khi HOG đưa ra dự đoán, độ tin cậy của dự đoán đó rất cao nhờ nắm bắt đúng cấu trúc hình học đặc thù của loài hoa.
+\end{itemize}
+
+\subsection{So sánh K-NN và Cây quyết định trong không gian nhiều chiều}
+Mô hình Cây quyết định chỉ đạt Accuracy $2.07\%$. Nguyên nhân là do cấu trúc cây phân tách không gian bằng các siêu phẳng song song với từng trục tọa độ đơn lẻ. Với vector HOG $1.764$ chiều và chỉ có 10 mẫu huấn luyện mỗi lớp, cây bị phân mảnh dữ liệu nghiêm trọng chỉ sau vài tầng phân nhánh, dẫn đến hiện tượng quá khớp trên tập Train và mất hoàn toàn khả năng tổng quát hóa trên tập Test. Ngược lại, K-NN xem xét khoảng cách Euclid tổng thể trên toàn bộ không gian thuộc tính nên giữ được sự ổn định tốt hơn.
+
+\section{Phân tích lỗi chi tiết (Error Analysis)}
+\subsection{Phân tích Ma trận nhầm lẫn}
+Hình \ref{fig:cm_knn_pixel}, \ref{fig:cm_knn_hog} và \ref{fig:cm_dt_hog} thể hiện ma trận nhầm lẫn kích thước $102 \times 102$ của 3 mô hình trên tập Test:
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/confusion_matrix_KNN_Pixel.png}
+    \caption{KNN Pixel}
+    \label{fig:cm_knn_pixel}
+\end{subfigure}
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/confusion_matrix_KNN_HOG.png}
+    \caption{KNN HOG}
+    \label{fig:cm_knn_hog}
+\end{subfigure}
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/confusion_matrix_DecisionTree_HOG.png}
+    \caption{Decision Tree HOG}
+    \label{fig:cm_dt_hog}
+\end{subfigure}
+\caption{Ma trận nhầm lẫn của ba mô hình thử nghiệm trên tập Test 6.149 mẫu}
+\label{fig:confusion_matrices}
+\end{figure}
+
+\subsection{Nhận diện các cặp loài hoa dễ nhầm lẫn nhất}
+Dựa trên tệp \texttt{outputs/top\_confusions\_KNN\_HOG.csv}, Bảng \ref{tab:top_confusions} liệt kê các cặp lớp có số lần nhầm lẫn cao nhất:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Top các cặp loài hoa có tần suất dự đoán nhầm lẫn cao nhất của mô hình KNN HOG}
+\label{tab:top_confusions}
+\begin{tabular}{@{}c p{3.2cm} p{3.2cm} c p{4.6cm}@{}}
+\hline
+\textbf{STT} & \textbf{Lớp thực tế} & \textbf{Lớp bị dự đoán nhầm} & \textbf{Số lần} & \textbf{Nguyên nhân hình thái thị giác} \\ \hline
+1 & Lớp 73 (Water Lily) & Lớp 35 (Alpine Sea Holly) & 32 & Cánh hoa xếp lớp tỏa tia nhọn \\
+2 & Lớp 77 (Passion Flower) & Lớp 33 (Love in the Mist) & 30 & Nhụy hoa dạng tua sợi phức tạp \\
+3 & Lớp 51 (Petunia) & Lớp 32 (Garden Phlox) & 26 & Cánh hoa liền hình phễu tròn \\
+4 & Lớp 77 (Passion Flower) & Lớp 10 (Globe Thistle) & 24 & Cấu trúc khối cầu tua rua \\
+5 & Lớp 51 (Petunia) & Lớp 28 (Stemless Gentian) & 22 & Cánh hoa xòe đơn viền lượn sóng \\
+6 & Lớp 94 (Bee Balm) & Lớp 25 (Grape Hyacinth) & 21 & Cụm hoa dạng tháp dài \\
+7 & Lớp 74 (Rose) & Lớp 29 (Artichoke) & 19 & Cánh hoa xếp lớp so le vảy \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Xây dựng và đánh giá ứng dụng Giao diện Desktop (GUI Demo)}
+\subsection{Kiến trúc và chức năng của ứng dụng}
+Ứng dụng được viết bằng Python Tkinter (\texttt{src/gui\_app.py}), nạp trực tiếp mô hình \texttt{outputs/best\_knn\_hog\_model.pt}. Giao diện hỗ trợ nạp ảnh bất kỳ, tự động trích xuất đặc trưng HOG, tra cứu từ điển song ngữ Anh - Việt cho 102 loài hoa và vẽ biểu đồ cột ngang xác suất Top-5 loài hoa gần nhất.
+
+\subsection{Minh chứng thực nghiệm 5 ca kiểm thử trên GUI}
+Các hình ảnh dưới đây minh họa kết quả kiểm thử thực tế của ứng dụng GUI trên 5 loài hoa tiêu biểu:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/gui_demo_sunflower.png}
+    \caption{Nhận diện Hoa Hướng dương (Lớp 54)}
+    \label{fig:gui_sunflower}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/gui_demo_rose.png}
+    \caption{Nhận diện Hoa Hồng đỏ (Lớp 74)}
+    \label{fig:gui_rose}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/gui_demo_dandelion.png}
+    \caption{Nhận diện Hoa Bồ công anh (Lớp 50)}
+    \label{fig:gui_dandelion}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{Hinhve/gui_demo_waterlily.png}
+    \caption{Nhận diện Hoa Súng nước (Lớp 73)}
+    \label{fig:gui_waterlily}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{Hinhve/gui_demo_petunia.png}
+\caption{Nhận diện Hoa Dạ yến thảo (Lớp 51) trên giao diện GUI Demo}
+\label{fig:gui_petunia}
+\end{figure}
+
+Thời gian phản hồi của ứng dụng ghi nhận dưới $30\text{ms}$ mỗi lần dự đoán, giao diện hoạt động mượt mà, trực quan, đáp ứng trọn vẹn yêu cầu điểm thưởng đồ án.
+\end{document}

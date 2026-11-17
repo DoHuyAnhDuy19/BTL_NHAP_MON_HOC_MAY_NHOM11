@@ -1,0 +1,135 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Khái quát về bài toán Phân loại ảnh trong Thị giác máy tính}
+Trong lĩnh vực Thị giác máy tính, Phân loại ảnh (Image Classification) là bài toán gán một nhãn danh mục xác định từ tập hợp các lớp định trước cho một ảnh đầu vào.
+
+Về mặt toán học, bài toán phân loại ảnh nhiều lớp được mô hình hóa như sau:
+Cho một tập hợp các ảnh đầu vào $I \in \mathcal{X}$, trong đó mỗi ảnh $I$ là một ma trận số nhiều chiều:
+\begin{itemize}
+    \item Đối với ảnh đa mức xám (Grayscale): $I \in \mathbb{R}^{H \times W}$, với $H$ là chiều cao, $W$ là chiều rộng tính bằng pixel, và mỗi điểm ảnh mang một giá trị cường độ sáng nguyên trong đoạn $[0, 255]$.
+    \item Đối với ảnh màu chuẩn RGB: $I \in \mathbb{R}^{H \times W \times 3}$, tương ứng với 3 kênh màu Đỏ (Red), Xanh lá (Green) và Xanh dương (Blue).
+\end{itemize}
+
+Giả sử tập hợp các nhãn lớp cần phân loại là $\mathcal{Y} = \{1, 2, \dots, C\}$, với $C = 102$ trong đề tài này.
+Mục tiêu của quy trình học máy là học một hàm ánh xạ $f: \mathcal{X} \rightarrow \mathcal{Y}$ sao cho hàm $f$ tối thiểu hóa kỳ vọng hàm mất mát trên phân phối dữ liệu tổng thể:
+\begin{equation}
+    \min_{\theta} \mathbb{E}_{(x, y) \sim \mathcal{P}(\mathcal{X}, \mathcal{Y})} [ \mathcal{L}(f(x; \theta), y) ]
+\end{equation}
+
+Khác với con người nhận biết bông hoa thông qua ngữ nghĩa cấp cao, máy tính chỉ tiếp nhận ma trận giá trị điểm ảnh cấp thấp (Semantic Gap). Do đó, thuật toán học máy phải trích xuất được những thông tin có tính bất biến đối với các phép biến đổi hình học (dịch chuyển, quay, tỷ lệ), bất biến với cường độ chiếu sáng và có năng lực phân biệt rõ nét giữa các loài hoa.
+
+\section{Khám phá bộ dữ liệu Oxford 102 Category Flower Dataset}
+\subsection{Nguồn gốc và bối cảnh bộ dữ liệu}
+Bộ dữ liệu \textbf{Oxford 102 Category Flower Dataset} được xây dựng và công bố bởi Maria-Elena Nilsback và Andrew Zisserman thuộc Nhóm Nghiên cứu Hình học Thị giác (VGG), Đại học Oxford vào năm 2008 \cite{nilsback2008automated, oxfordflowers102}. Bộ dữ liệu được thiết kế nhằm thúc đẩy các nghiên cứu về phân loại đối tượng chi tiết (Fine-grained Visual Categorization), tập trung vào 102 loài hoa phổ biến tại Vương quốc Anh.
+
+\subsection{Cấu trúc phân chia dữ liệu chính thức}
+Bộ dữ liệu gồm tổng cộng 8.189 bức ảnh màu tự nhiên. Nhóm tác giả đã cố định sẵn ba tập phân chia chính thức:
+\begin{itemize}
+    \item \textbf{Tập Huấn luyện (Training set):} Gồm chính xác 1.020 ảnh. Mỗi lớp có đúng 10 ảnh ($102 \times 10 = 1.020$ ảnh).
+    \item \textbf{Tập Kiểm thực (Validation set):} Gồm chính xác 1.020 ảnh. Mỗi lớp có đúng 10 ảnh ($102 \times 10 = 1.020$ ảnh), phục vụ dò tìm siêu tham số.
+    \item \textbf{Tập Kiểm thử (Testing set):} Gồm 6.149 ảnh còn lại ($75.10\%$ tổng lượng dữ liệu). Số lượng ảnh mỗi lớp dao động rất lớn từ 20 đến 238 ảnh/lớp.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Thống kê tổng quan cấu trúc phân chia dữ liệu chính thức Oxford Flowers 102}
+\label{tab:dataset_summary}
+\begin{tabular}{@{}lrrrrr@{}}
+\hline
+\textbf{Tập dữ liệu} & \textbf{Số lượng ảnh} & \textbf{Số lớp} & \textbf{Min ảnh/lớp} & \textbf{Max ảnh/lớp} & \textbf{Tỷ lệ (\%)} \\ \hline
+Training Set & 1.020 & 102 & 10 & 10 & 12.45\% \\
+Validation Set & 1.020 & 102 & 10 & 10 & 12.45\% \\
+Testing Set & 6.149 & 102 & 20 & 238 & 75.10\% \\ \hline
+\textbf{Tổng cộng} & \textbf{8.189} & \textbf{102} & \textbf{--} & \textbf{--} & \textbf{100.00\%} \\ \hline
+\end{tabular}
+\end{table}
+
+Đặc tính phân bổ trên đặt ra hai thách thức:
+\begin{enumerate}
+    \item Số lượng mẫu huấn luyện cực kỳ ít ỏi (chỉ 10 ảnh/lớp) trên một bài toán có tới 102 lớp.
+    \item Tập kiểm thử bị mất cân bằng mạnh (Class Imbalance), buộc quy trình đánh giá phải sử dụng Macro-F1 để tránh thiên vị vào các lớp nhiều ảnh.
+\end{enumerate}
+
+\section{Cơ sở lý thuyết các phương pháp biểu diễn đặc trưng ảnh}
+\subsection{Phương pháp Vector điểm ảnh thô (Raw Pixel Flattening)}
+Phương pháp vector điểm ảnh thô là phương án tiếp cận cơ sở (Baseline):
+Toàn bộ ảnh màu RGB sau khi resize về kích thước chuẩn $32 \times 32$ được chuẩn hóa giá trị điểm ảnh về $[0, 1]$ bằng phép chia cho 255.0 và duỗi phẳng thành vector:
+\begin{equation}
+    \mathbf{x} = [p_1, p_2, \dots, p_D]^T \in \mathbb{R}^D, \quad \text{với } D = 32 \times 32 \times 3 = 3.072 \text{ chiều.}
+\end{equation}
+Ưu điểm của phương pháp này là giữ lại trọn vẹn thông tin 3 kênh màu RGB -- yếu tố thị giác có tính phân biệt tự nhiên rất cao đối với các loài hoa. Nhược điểm lớn là cực kỳ nhạy cảm với dịch chuyển vị trí, góc chụp và bóng râm.
+
+\subsection{Phương pháp trích xuất đặc trưng HOG (Histogram of Oriented Gradients)}
+Bộ mô tả HOG do Dalal và Triggs đề xuất \cite{dalal2005histograms} nắm bắt cấu trúc hình học và đường viền biên của cánh hoa thông qua sự phân bố của hướng gradient.
+
+Quy trình tính toán HOG gồm 4 bước:
+\begin{enumerate}
+    \item \textbf{Tính toán Gradient:} Ảnh mức xám $I(x, y)$ kích thước $64 \times 64$ được tính đạo hàm theo hai phương bằng mặt nạ sai phân trung tâm $[-1, 0, 1]$:
+    \begin{align}
+        g_x(x, y) &= I(x + 1, y) - I(x - 1, y) \\
+        g_y(x, y) &= I(x, y + 1) - I(x, y - 1)
+    \end{align}
+    Độ lớn gradient $m(x, y)$ và hướng pha không dấu $\theta(x, y) \in [0, 180^\circ)$ được xác định bởi:
+    \begin{equation}
+        m(x, y) = \sqrt{g_x(x, y)^2 + g_y(x, y)^2}, \quad \theta(x, y) = \arctan\left(\frac{g_y(x, y)}{g_x(x, y)}\right) \pmod{180^\circ}
+    \end{equation}
+
+    \item \textbf{Lượng tử hóa hướng trên Cell:} Ảnh được chia thành các Cell kích thước $8 \times 8$ pixel ($8 \times 8 = 64$ Cells). Mỗi Cell tính histogram gồm 9 bin góc (độ rộng mỗi bin là $20^\circ$). Mỗi pixel đóng góp độ lớn $m(x, y)$ vào bin góc tương ứng.
+
+    \item \textbf{Chuẩn hóa theo Khối chồng lấn (Block Normalization):} Nhóm các Cell liền kề thành Khối (Block) kích thước $2 \times 2$ Cells ($16 \times 16$ pixel). Với bước trượt 1 Cell, toàn ảnh có $7 \times 7 = 49$ Blocks. Trong mỗi Block (chứa $4 \times 9 = 36$ giá trị), vector được chuẩn hóa theo chuẩn L2-Hys:
+    \begin{equation}
+        \mathbf{v}_{\text{norm}} = \frac{\mathbf{v}}{\sqrt{\|\mathbf{v}\|_2^2 + \epsilon^2}}, \quad \mathbf{v}_{\text{clip}} = \min(\mathbf{v}_{\text{norm}}, 0.2), \quad \mathbf{v}_{\text{final}} = \frac{\mathbf{v}_{\text{clip}}}{\sqrt{\|\mathbf{v}_{\text{clip}}\|_2^2 + \epsilon^2}}
+    \end{equation}
+
+    \item \textbf{Ghép nối vector đặc trưng:} Ghép nối 49 Blocks lại với nhau thu được vector HOG hoàn chỉnh có kích thước:
+    \begin{equation}
+        D_{\text{HOG}} = 49 \text{ blocks} \times 36 \text{ chiều/block} = 1.764 \text{ chiều.}
+    \end{equation}
+\end{enumerate}
+
+\section{Cơ sở lý thuyết thuật toán K-Nearest Neighbors (K-NN)}
+\subsection{Nguyên lý học lười (Lazy Learning)}
+K-NN là một thuật toán phi tham số học theo mẫu (Instance-based learning) \cite{bishop2006pattern}. Trong pha huấn luyện, K-NN chỉ đơn giản lưu trữ toàn bộ tập dữ liệu và nhãn vào bộ nhớ. Tại pha suy luận, mô hình tính khoảng cách từ mẫu kiểm thử đến tất cả các mẫu huấn luyện để tìm ra $k$ láng giềng gần nhất.
+
+\subsection{Hàm khoảng cách và quy tắc bỏ phiếu}
+Khoảng cách Euclid chuẩn $L_2$ giữa hai vector $\mathbf{u}, \mathbf{v} \in \mathbb{R}^D$:
+\begin{equation}
+    d_2(\mathbf{u}, \mathbf{v}) = \sqrt{\sum_{j=1}^D (u_j - v_j)^2}
+\end{equation}
+Quy tắc bỏ phiếu đa số đồng đều xác định nhãn dự đoán:
+\begin{equation}
+    \hat{y} = \arg\max_{c \in \{1, \dots, C\}} \sum_{\mathbf{x}_i \in \mathcal{N}_k(\mathbf{x})} \mathbb{I}(y_i = c)
+\end{equation}
+Trong không gian nhiều chiều ($D = 1.764$ hoặc $3.072$), K-NN chịu tác động của ``Lời nguyền số chiều'' (Curse of Dimensionality), khiến khoảng cách giữa các điểm có xu hướng co cụm lại, làm suy giảm tính phân biệt hình học.
+
+\section{Cơ sở lý thuyết thuật toán Cây quyết định (Decision Tree)}
+\subsection{Cơ chế phân tách và chỉ số vẩn đục Gini}
+Cây quyết định phân chia không gian đặc trưng một cách đệ quy bằng các siêu phẳng song song với trục tọa độ \cite{hastie2009elements}. Tiêu chí phân tách tại mỗi nút sử dụng độ vẩn đục Gini (Gini Impurity):
+\begin{equation}
+    \text{Gini}(D) = 1 - \sum_{c=1}^C p_c^2
+\end{equation}
+trong đó $p_c$ là tỷ lệ mẫu thuộc lớp $c$ tại nút $D$. Thuật toán chọn đặc trưng $j$ và ngưỡng $\theta$ sao cho độ giảm Gini lớn nhất:
+\begin{equation}
+    \Delta \text{Gini} = \text{Gini}(D) - \left( \frac{|D_{\text{left}}|}{|D|} \text{Gini}(D_{\text{left}}) + \frac{|D_{\text{right}}|}{|D|} \text{Gini}(D_{\text{right}}) \right)
+\end{equation}
+
+\subsection{Hiện tượng Overfitting và kiểm soát độ sâu}
+Cây quyết định không giới hạn sẽ tiếp tục phân nhánh cho đến khi mọi nút lá đều thuần khiết ($\text{Gini} = 0$), gây quá khớp hoàn toàn vào tập Train. Do đó, tham số $\text{max\_depth}$ được áp dụng để hạn chế độ phức tạp của cây, tránh phân mảnh dữ liệu khi số lượng lớp quá lớn.
+
+\section{Hệ thống các độ đo đánh giá mô hình học máy}
+Để đánh giá toàn diện mô hình trên bộ dữ liệu mất cân bằng, nhóm sử dụng hệ thống độ đo chuẩn:
+\begin{itemize}
+    \item \textbf{Accuracy:} Tỷ lệ dự đoán đúng trên tổng số mẫu: $\text{Acc} = \frac{\sum_{c=1}^C \text{TP}_c}{N_{\text{total}}}$.
+    \item \textbf{Precision và Recall của từng lớp $c$:}
+    \begin{equation}
+        \text{Precision}_c = \frac{\text{TP}_c}{\text{TP}_c + \text{FP}_c}, \quad \text{Recall}_c = \frac{\text{TP}_c}{\text{TP}_c + \text{FN}_c}
+    \end{equation}
+    \item \textbf{Macro-Averaged F1-score (Độ đo chủ đạo):}
+    \begin{equation}
+        \text{Macro-F1} = \frac{1}{C} \sum_{c=1}^C \text{F1}_c = \frac{1}{C} \sum_{c=1}^C \frac{2 \times \text{Precision}_c \times \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}
+    \end{equation}
+    Macro-F1 đánh giá bình đẳng năng lực dự đoán trên tất cả 102 loài hoa, phản ánh chính xác chất lượng mô hình mà không bị bóp méo bởi các lớp chiếm số đông mẫu.
+\end{itemize}
+\end{document}

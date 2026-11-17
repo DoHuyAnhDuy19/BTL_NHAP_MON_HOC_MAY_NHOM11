@@ -1,0 +1,4 @@
+split,images,classes,min_per_class,max_per_class
+train,1020,102,10,10
+validation,1020,102,10,10
+test,6149,102,20,238

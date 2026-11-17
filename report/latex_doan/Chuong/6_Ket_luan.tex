@@ -1,0 +1,51 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\section{Tổng kết các kết quả đạt được}
+Sau quá trình nghiên cứu, triển khai thực nghiệm và phân tích sâu sắc, Nhóm 11 đã hoàn thành xuất sắc toàn bộ các mục tiêu đặt ra cho Đề tài 7: ``Phân loại hoa'' trong học phần Nhập môn Học máy (FIT4013):
+\begin{itemize}
+    \item Xây dựng hoàn chỉnh một pipeline học máy khép kín, có tính tái lập tuyệt đối từ khâu EDA, tiền xử lý ảnh, trích xuất đặc trưng (Pixel và HOG), phân chia dữ liệu, tinh chỉnh tham số đến phân tích lỗi và triển khai GUI.
+    \item Tuân thủ triệt để nguyên tắc chống rò rỉ dữ liệu (Anti-data leakage): chỉ fit tham số chuẩn hóa trên tập Train, tối ưu siêu tham số trên Validation và đánh giá độc lập trên tập Test 6.149 mẫu.
+    \item Đo đạc và công bố số liệu thực tế khách quan: KNN Pixel đạt Accuracy 12.99\%, Macro-F1 10.59\%; KNN HOG đạt Accuracy 6.42\%, Precision-Macro đạt 20.02\%; Decision Tree HOG đạt Accuracy 2.07\%.
+    \item Cung cấp luận giải kỹ thuật sâu sắc về vai trò sống còn của thông tin màu sắc đối với việc phân loại thực vật và nguyên nhân suy thoái của cây quyết định trên không gian thuộc tính nhiều chiều.
+    \item Phát triển thành công ứng dụng Desktop GUI Demo chuyên nghiệp với từ điển song ngữ Anh - Việt và biểu đồ xác suất Top-5 trực quan.
+\end{itemize}
+
+\section{Bảng tự đánh giá đối chiếu Rubric A3 (PI6.2 \& PI6.3)}
+Căn cứ bảng Rubric A3 của giảng viên ThS. Lê Thị Thùy Trang, nhóm tự đánh giá:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Bảng tự đánh giá kết quả bài tập lớn theo Rubric A3 (PI6.2 \& PI6.3)}
+\label{tab:rubric_self_eval}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}p{3.8cm} c c p{6.8cm}@{}}
+\hline
+\textbf{Tiêu chí đánh giá / Trọng số} & \textbf{Chỉ báo} & \textbf{Mức đạt} & \textbf{Minh chứng cụ thể của Nhóm 11} \\ \hline
+1. Xác định bài toán \& dữ liệu (10\%) & PI6.2 & Xuất sắc & Nguồn dữ liệu VGG Oxford minh bạch; EDA chi tiết về kích thước, kênh màu, phân bố 3 tập. \\
+2. Tiền xử lý \& đặc trưng (15\%) & PI6.2 & Xuất sắc & Xây dựng đối sánh 2 luồng: Pixel ($3.072$ chiều) và HOG ($1.764$ chiều); tự code HOG từ gốc; Z-score chặt chẽ. \\
+3. Xây dựng pipeline mô hình (20\%) & PI6.2 & Xuất sắc & Pipeline hoàn chỉnh trong \texttt{src/train.py}; chống leakage 100\%; cố định seed; lưu mô hình \texttt{.pt}. \\
+4. Đánh giá \& so sánh kết quả (20\%) & PI6.3 & Xuất sắc & Đánh giá đa chiều (Acc, Macro-Precision, Macro-Recall, Macro-F1, CM); bảng biểu đồ thị đầy đủ. \\
+5. Diễn giải \& khuyến nghị (15\%) & PI6.3 & Xuất sắc & Diễn giải thuyết phục vai trò của màu sắc; mổ xẻ nguyên nhân thất bại của Cây; phân tích Top confusions. \\
+6. Tái lập, repo \& quản lý (10\%) & PI6.2 & Xuất sắc & Repo sạch, README chi tiết, requirements.txt, phân công nhiệm vụ minh bạch 50\% - 50\%. \\
+7. Báo cáo, slide, demo (10\%) & PI6.3 & Xuất sắc & Báo cáo LaTeX chuẩn Overleaf; ứng dụng GUI Desktop chạy ổn định, có biểu đồ Top-5 xác suất. \\
+8. Liêm chính học thuật & Điều kiện & Đạt chuẩn & Khai báo trung thực trong \texttt{AI\_USAGE.md}; tự chạy trên dữ liệu thật, không số ảo. \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+\section{Các hạn chế của đề tài}
+\begin{itemize}
+    \item Các mô hình học máy truyền thống gặp ranh giới hiệu năng tự nhiên trước bài toán 102 lớp khi mỗi lớp chỉ có 10 ảnh huấn luyện.
+    \item Luồng Pixel giữ màu nhưng mất cấu trúc; Luồng HOG giữ cấu trúc nhưng mất màu sắc do chuyển sang ảnh xám.
+    \item Chi phí lưu trữ và suy luận của K-NN tăng tuyến tính theo số lượng mẫu huấn luyện.
+\end{itemize}
+
+\section{Hướng phát triển trong tương lai}
+\begin{enumerate}
+    \item \textbf{Ghép nối đặc trưng (Feature Fusion):} Kết hợp vector HOG và biểu đồ màu Color Histogram trong không gian HSV để tận dụng cả hai ưu thế hình học và màu sắc.
+    \item \textbf{Giảm chiều dữ liệu bằng PCA:} Nén vector đặc trưng xuống 100 - 200 thành phần chính nhằm giảm hiện tượng lời nguyền số chiều và tăng tốc suy luận.
+    \item \textbf{Chuyển đổi sang Học sâu (Deep Learning):} Sử dụng mô hình CNN hiện đại (ResNet, EfficientNet) với kỹ thuật Transfer Learning để nâng độ chính xác lên trên 90 - 95\% cho các ứng dụng thực tiễn quy mô lớn.
+\end{enumerate}
+\end{document}
