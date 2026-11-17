@@ -259,6 +259,12 @@ class FlowerClassifierGUI(tk.Tk):
         self._setup_ui()
         self._load_initial_sample()
 
+        # Đưa cửa sổ ứng dụng nổi lên hàng đầu (Foreground / Bring to front)
+        self.lift()
+        self.attributes('-topmost', True)
+        self.after(600, lambda: self.attributes('-topmost', False))
+        self.focus_force()
+
     def _setup_ui(self):
         # 1. Header
         header = tk.Frame(self, bg="#1e3a8a", height=75)

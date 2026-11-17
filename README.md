@@ -36,7 +36,10 @@ pip install -r requirements.txt
 # 2. Huấn luyện toàn bộ pipeline và xuất kết quả
 python src/train.py
 
-# 3. Khởi chạy giao diện Desktop tương tác (GUI Tkinter)
+# 3. Khởi chạy giao diện Web trên trình duyệt (Khuyến nghị)
+python src/web_app.py
+
+# 4. Khởi chạy giao diện Desktop tương tác (GUI Tkinter)
 python src/gui_app.py
 
 # (Tùy chọn) Chạy chế độ headless sinh ảnh minh chứng giao diện
@@ -45,7 +48,9 @@ python src/gui_app.py --demo
 
 ## 5. Cấu trúc
 - `notebooks/`: notebook chạy toàn bộ pipeline.
-- `src/train.py`: mã nguồn chạy độc lập.
+- `src/train.py`: mã nguồn huấn luyện pipeline độc lập.
+- `src/web_app.py`: giao diện ứng dụng Web tương tác trên trình duyệt.
+- `src/gui_app.py`: giao diện Desktop GUI Tkinter.
 - `report/main.tex`: báo cáo LaTeX theo sáu phần nội dung bắt buộc.
 - `outputs/`: được tạo sau khi chạy, chứa CSV, biểu đồ, mô hình và báo cáo metric.
 - `AI_USAGE.md`: khai báo sử dụng AI.
